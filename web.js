@@ -1,69 +1,153 @@
-// Create a HTTP server on port 8000
-// Send plain text headers and 'Hello World' to each client
 
-var http = require("http");
-var express = require("express");
-var port = process.env.PORT || 8000;
-var urlParse = require('url');
+
+function CalendarsRepo() {
+	this.calendars = [];
+	// id for calendars
+	this.nextId = 1;
+	this.nextEventId = 1;
+}
+
+CalendarsRepo.prototype.findAll = function () {
+    return this.calendars;
+}
+
+CalendarsRepo.prototype.find = function (id) {
+	var calendar = this.calendars.filter(function (item) {
+		return item.calId == id;
+	})[0];
+
+	if (null == calendar) {
+		throw new Error('Calendar does not exist');
+	} 
+	return calendar;
+}
+
+CalendarsRepo.prototype.findIndex = function (id) {
+    var index = null;
+    this.calendars.forEach(function(item, key) {
+        if (item.calId == id) {
+            index = key;
+        }
+    });
+    if (null == index) {
+        throw new Error('calendar not found');
+    }
+    return index;
+}
+
+CalendarsRepo.prototype.addCalendar = function (calendar) {
+    if (calendar.calId == null || calendar.calId == 0) {
+        calendar.calId = this.nextId;
+        // add calendar to the array
+        calendar.events = [];
+        this.calendars.push(calendar);
+        // auto increment
+        this.nextId++;
+    } else {
+    	throw new Error('This id is aready used');
+    }
+}
+
+CalendarsRepo.prototype.addEvent = function (newEvent, calId) {
+    newEvent.Id = this.nextEventId;
+    // add calendar to the array
+    this.calendars[calId - 1].events.push(newEvent);
+    // auto increment
+    this.nextEventId++;
+}
+
+CalendarsRepo.prototype.removeEvent = function (eventId, calId) {
+    var index = null;
+    this.calendars[this.findIndex(calId)].events.forEach(function(item, key) {
+        if (item.calId == id) {
+            index = key;
+        }
+    });
+    if (null == index) {
+        throw new Error('event not found');
+    }
+    return index;
+}
+
+CalendarsRepo.prototype.remove = function (id) {
+    var index = this.findIndex(id);
+    // remove
+    this.calendars.splice(index, 1);
+}
+
+// Develop the api
+// Intialise the CRUD calls
+
+var express = require('express');
 var app = express();
-var counter = 0;
-// Rest function to split the requests
-/* 
-restFunc = function(method, tableName, recId, bodyStr) {
-	var insertObj, outObj;
-	outObj = {
-		success : true
-	}
+var calRepo = new CalendarsRepo();
 
-	if { !tableName || tableName !== 'calender'} {
-		outObj.success = false;
-		outObj.message = "REST error: table name invalid or missing";
-	} else if (method === 'POST' || method === 'PUT') {
-		insertObj = JSON.parse(bodyStr);
-	}
-	if (!outObj.success) {
-		return outObj;
-	}
+app.configure(function () {
+    app.use(express.bodyParser());
+});
 
-	switch (method) {
-		case 'GET':
-	}
-};
-*/
-http.createServer(function (req, res) {
-  	
-	var path = req.url;
-	console.log("requested=" + path + " counter=" + counter);
+app.get('/calendars', function (request, response) {
+    response.json({calendars: calRepo.findAll()});
+});
 
-	req.on('data', function(chunk) {
-		bodyStr += chunk.toString();
+// retrieve a specific calendar
+app.get('/calendars/:id', function (request, response) {
+	var id = request.params.id;;
+    try {
+		console.log('Calendarid ' + id);
+        response.json(calRepo.find(id));
+    } catch (exeception) {
+        response.send(404);
+    }
+});
+
+// create a new calendar
+app.post('/calendars', function (request, response) {
+	var cal = request.body;
+	calRepo.addCalendar({
+		// intialise the caled
+		userName: cal.userName || 'Default name',
+		password: cal.password || 'Default'
 	});
+	response.send(200);
+});
 
-	res.writeHead(200, {'Content-Type': 'text/html'}); // prepare response headers
+// add a calendar
+app.put('/calendars/newEvent/:id', function (request, response) {
+    var newEvent = request.body;
+    var calId = request.params.id;
+    try {
+        calRepo.addEvent({
+        		date: newEvent.date || 'today',
+	            description: newEvent.description || 'something boring',
+	            startTime: newEvent.start || 'today oclock',
+	            endTime: newEvent.status || 'never oclock',
+	            location: newEvent.location || 'home town',
+	            repeats: newEvent.repeats || 'None'}
+        	, calId);
+        response.send(200);
+    } catch (exception) {
+        response.send(404);
+    }
+});
+// delete a specific event from a calendar
+app.delete('/calendars/:calId/:eventId', function (request, response) {
+    try {
+        calRepo.removeEvent(request.params.calId, eventId);
+        response.send(200);
+    } catch (exeception) {
+        response.send(404);
+    }
+});
+// delete a calendar
+app.delete('/calendars/:id', function (request, response) {
+    try {
+        calRepo.remove(request.params.id);
+        response.send(200);
+    } catch (exeception) {
+        response.send(404);
+    }
+});
 
-	url = urlParse.parse(req.url, true);
-	urlpathname = url.pathname;
-	argArray = urlpathname.split('/');
+app.listen(8080);
 
-	tableName = argArray[1];
-	recId = argArray[2];
-
-	outputstr = "Hello world <br> \n" + req.method;
-	outputstr += "table name<br> \n" + tableName;
-	outputstr += "record id <br> \n" + recId;
-	res.end(outputstr); 
-	/* 
-	if (path == "/") {
-		res.end("Calender API .....<br><a href='/page2'>Page 2</a><br><a href='/page3'>Page 3</a>\n");
-	} else if (path == "/page2") {
-		res.end("This is page 2. <a href='/'>Back.</a>\n"); // send response and close connection	
-	} else if (path == "/page2") {
-		res.end("This is page 3. <a href='/'>Back.</a>\n"); // send response and close connection	
-	}
-	*/
-
-
-}).listen(port);
-
-// console info message
-console.log('Server running at http://127.0.0.1:' + port);

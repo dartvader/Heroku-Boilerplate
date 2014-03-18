@@ -1,1 +1,1 @@
-web: node rest_api2.js
+web: node web.js
