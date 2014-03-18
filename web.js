@@ -151,4 +151,5 @@ app.delete('/calendars/:id', function (request, response) {
 });
 
 app.listen(port);
+console.log("Listening on " + port);
 
