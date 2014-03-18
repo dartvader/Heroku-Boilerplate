@@ -73,7 +73,7 @@ CalendarsRepo.prototype.removeEvent = function (eventId, calId) {
         throw new Error('event not found');
     }
 
-    this.calendars.[calId].events.splice(index, 1);
+    this.calendars[calId].events.splice(index, 1);
     return index;
 }
 
