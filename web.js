@@ -1,4 +1,7 @@
 
+/*
+	CalendarsRepo class is being used for persistance
+*/
 
 function CalendarsRepo() {
 	this.calendars = [];
@@ -52,35 +55,43 @@ CalendarsRepo.prototype.addEvent = function (newEvent, calId) {
     newEvent.Id = this.nextEventId;
     // add calendar to the array
     this.calendars[calId - 1].events.push(newEvent);
-    // auto increment
     this.nextEventId++;
 }
 
+
 CalendarsRepo.prototype.removeEvent = function (eventId, calId) {
     var index = null;
-    this.calendars[this.findIndex(calId)].events.forEach(function(item, key) {
+    var calId = this.findIndex(calId);
+
+    this.calendars[calId].events.forEach(function(item, key) {
         if (item.calId == id) {
             index = key;
         }
     });
+
     if (null == index) {
         throw new Error('event not found');
     }
+
+    this.calendars.[calId].events.splice(index, 1);
     return index;
 }
 
-CalendarsRepo.prototype.remove = function (id) {
+CalendarsRepo.prototype.removeCal = function (id) {
     var index = this.findIndex(id);
-    // remove
     this.calendars.splice(index, 1);
 }
 
-// Develop the api
-// Intialise the CRUD calls
+/* 
+	-----------------
+	intialise the api
+	------------------
+*/
 
 var express = require('express');
 var app = express();
 var calRepo = new CalendarsRepo();
+
 var port = Number(process.env.PORT || 5000);
 
 app.configure(function () {
@@ -90,8 +101,9 @@ app.configure(function () {
 app.get('/calendars', function (request, response) {
     response.json({calendars: calRepo.findAll()});
 });
-
-// retrieve a specific calendar
+/*
+	retrieve a specific calendar
+*/
 app.get('/calendars/:id', function (request, response) {
 	var id = request.params.id;;
     try {
@@ -101,8 +113,28 @@ app.get('/calendars/:id', function (request, response) {
         response.send(404);
     }
 });
+/* 
+	get events if they are between start date and end date
 
-// create a new calendar
+*/
+app.get('/calendars/:id/:startDate/:endDate', function (request, response) {
+	var id = request.params.id;
+	var startDate = request.params.startDate;
+	var endDate = request.params.endDate;
+
+    try {
+		console.log('Calendarid ' + id);
+        response.json(calRepo.find(id));
+    } catch (exeception) {
+        response.send(404);
+    }
+});
+/*
+	create a new calendar
+
+	curl -i -X POST http://calendernodejs-lee.herokuapp.com/calendars 
+	--data '{"userName":"leeee","password":"leeeespass"}' -H "Content-Type: application/json"
+*/
 app.post('/calendars', function (request, response) {
 	var cal = request.body;
 	calRepo.addCalendar({
@@ -112,17 +144,20 @@ app.post('/calendars', function (request, response) {
 	});
 	response.send(200);
 });
+/*
+	adding a new event to a specific calendar
 
-// add a calendar
+	curl -i -X PUT http://calendernodejs-lee.herokuapp.com/calendars/newEvent/1 --data '{"startTime":"13/06/2014 08:00:00","endTime":"15/06/2014 08:00:00"}' -H "content-Type: application/json"
+
+*/
 app.put('/calendars/newEvent/:id', function (request, response) {
     var newEvent = request.body;
     var calId = request.params.id;
     try {
         calRepo.addEvent({
-        		date: newEvent.date || 'today',
 	            description: newEvent.description || 'something boring',
-	            startTime: newEvent.start || 'today oclock',
-	            endTime: newEvent.status || 'never oclock',
+	            startTime: newEvent.startTime || 'format 02-20-2012 00:00:00',
+	            endTime: newEvent.endTime || 'format 02-20-2012 00:00:00',
 	            location: newEvent.location || 'home town',
 	            repeats: newEvent.repeats || 'None'}
         	, calId);
@@ -131,7 +166,9 @@ app.put('/calendars/newEvent/:id', function (request, response) {
         response.send(404);
     }
 });
-// delete a specific event from a calendar
+/*
+	delete a specific event from a calendar
+*/
 app.delete('/calendars/:calId/:eventId', function (request, response) {
     try {
         calRepo.removeEvent(request.params.calId, eventId);
@@ -140,10 +177,12 @@ app.delete('/calendars/:calId/:eventId', function (request, response) {
         response.send(404);
     }
 });
-// delete a calendar
+/*
+ 	delete a specific calendar from calendars
+*/
 app.delete('/calendars/:id', function (request, response) {
     try {
-        calRepo.remove(request.params.id);
+        calRepo.removeCal(request.params.id);
         response.send(200);
     } catch (exeception) {
         response.send(404);
