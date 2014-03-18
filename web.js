@@ -81,6 +81,7 @@ CalendarsRepo.prototype.remove = function (id) {
 var express = require('express');
 var app = express();
 var calRepo = new CalendarsRepo();
+var port = Number(process.env.PORT || 5000);
 
 app.configure(function () {
     app.use(express.bodyParser());
@@ -149,5 +150,5 @@ app.delete('/calendars/:id', function (request, response) {
     }
 });
 
-app.listen(8080);
+app.listen(port);
 
