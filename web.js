@@ -97,27 +97,7 @@ CalendarsRepo.prototype.addEvent = function (newEvent, calId) {
 
 // not working
 CalendarsRepo.prototype.findEvents = function (calId, start, end) {
-    var calId = this.findIndex(calId);
-    var eventsFound = [];
-
-    var start = moment(start,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");
-	var end = moment(end,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");	
-
-    console.log('start ' + start);
-	console.log('end ' + end);
-    this.calendars[calId].events.forEach(function(value) {
-    	var tempStart = moment(value.endTime,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");
-    	var tempEnd = moment(value.startTime,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");
-        
-        if (start > tempStart 
-        		&& end < tempEnd) {
-            console.log('events found fufdfads ' + value.Id);
-            eventsFound.push[value];
-        }
-    });
-    if (null == index) {
-        throw new Error('No events are in this time frame');
-    }
+    
     return eventsFound;
 }
 
@@ -150,7 +130,6 @@ CalendarsRepo.prototype.removeCal = function (id) {
 */
 
 var express = require('express');
-var moment = require('moment');
 var app = express();
 var calRepo = new CalendarsRepo();
 var port = Number(process.env.PORT || 5000);
@@ -264,6 +243,7 @@ app.put('/calendars/newEvent/:id', function (request, response) {
     }
 });
 // updating the calenders itself
+// curl -i -X PUT http://localhost:5000/updateCalendar/3 --data '{"userName":"fffffffff","password":"fffffff"}' -H "Content-Type: application/json"
 app.put('/updateCalendar/:id', function (request, response) {
 
     var updatedCal = request.body;
