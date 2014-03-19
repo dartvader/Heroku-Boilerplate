@@ -50,7 +50,7 @@ frisby.create('Alter the user name and password on a calendar id 1')
 
 
 // not working
-xfrisby.create('find events between date ranges')
+frisby.create('find events between date ranges')
   .get('http://calendernodejs-lee.herokuapp.com/calendars/getEvents/"13-06-2013"/"13-06-2015"')
   	.expectStatus(200)
   		.expectHeaderContains('Content-Type', 'json')
