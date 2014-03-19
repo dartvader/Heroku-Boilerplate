@@ -79,36 +79,50 @@ CalendarsRepo.prototype.addCalendar = function (calendar) {
     }
 }
 
+CalendarsRepo.prototype.updateCalendar = function (updatedCalendar) {
+
+    console.log('calendar ' + updatedCalendar.calId);
+    console.log('calendar ' + updatedCalendar.userName);
+    console.log('calendar ' + updatedCalendar.password);
+    var index = this.findIndex(updatedCalendar.calId);
+    this.calendars[index] = updatedCalendar;
+}
+
 CalendarsRepo.prototype.addEvent = function (newEvent, calId) {
     newEvent.Id = this.nextEventId;
     // add calendar to the array
-    console.log('adding events ' + newEvent.description);
     this.calendars[calId - 1].events.push(newEvent);
     this.nextEventId++;
 }
 
-
+// not working
 CalendarsRepo.prototype.findEvents = function (calId, start, end) {
-
     var calId = this.findIndex(calId);
     var eventsFound = [];
 
-    this.calendars[calId - 1].events.forEach(function(value) {
-        if (value.startTime > start && value.endTime < end) {
-            console.log('events found ' + value.Id);
+    var start = moment(start,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");
+	var end = moment(end,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");	
+
+    console.log('start ' + start);
+	console.log('end ' + end);
+    this.calendars[calId].events.forEach(function(value) {
+    	var tempStart = moment(value.endTime,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");
+    	var tempEnd = moment(value.startTime,"DD-MM-YYYY HH:MM").format("DD-MM-YYYY HH:MM");
+        
+        if (start > tempStart 
+        		&& end < tempEnd) {
+            console.log('events found fufdfads ' + value.Id);
             eventsFound.push[value];
         }
     });
-
     if (null == index) {
         throw new Error('No events are in this time frame');
     }
     return eventsFound;
 }
 
-CalendarsRepo.prototype.removeEvent = function (eventId, calId) {
+CalendarsRepo.prototype.removeEvent = function (calId, eventId) {
     var index = null;
-
     var calId = this.findIndex(calId);
 
     console.log("found calendar " + calId);
@@ -131,11 +145,12 @@ CalendarsRepo.prototype.removeCal = function (id) {
 
 /* 
 	-----------------
-	intialise the api
+	REST api
 	------------------
 */
 
 var express = require('express');
+var moment = require('moment');
 var app = express();
 var calRepo = new CalendarsRepo();
 var port = Number(process.env.PORT || 5000);
@@ -167,19 +182,20 @@ app.get('/calendars/:id', function (request, response) {
 /* 
 	get events if they are between start date and end date
 	this call requires full dates MM-DD-YYYY HH:MM:SS
-	curl -i -X GET http://localhost:5000/calendars/1/ "13-06-2014 08:00:00"/"13-12-2014 18:00:00"
+	curl -i -X GET http://localhost:5000/calendars/getEvents/1/ "13-06-2014 08:00:00"/"13-12-2014 18:00:00"
 
 */
 app.get('/calendars/getEvents/:id/:startTime/:endTime', function (request, response) {
-	var id = request.params.id;
+	var calId = request.params.id;
 	var start = request.params.startTime;
 	var end = request.params.endTime;
 
-	console.log('Calendarid ' + id + ' start ' + start + ' end ' + end);
+	console.log('Calendarid ' + calId + ' start ' + start + ' end ' + end);
 
     try {
-		console.log('Calendarid ' + id + ' start ' + start + ' end ' + end);
-        response.json(calRepo.findEvents(id , start, end));
+		console.log('Calendarid ' + calId + ' start ' + start + ' end ' + end);
+        response.json(calRepo.findEvents(calId , start, end));
+        response.send(200);
     } catch (exeception) {
         response.send(404);
     }
@@ -209,8 +225,8 @@ app.post('/newCalendar', function (request, response) {
 	try {
 		calRepo.addCalendar({
 			// intialise the caled
-			userName: cal.userName,
-			password: cal.password
+			userName: cal.userName  || 'need a userName',
+			password: cal.password || 'need a password'
 		});
 		response.send(200);
 	} catch (exeception) {
@@ -236,12 +252,39 @@ app.put('/calendars/newEvent/:id', function (request, response) {
     try {
         calRepo.addEvent({
 	            description: newEvent.description || 'something boring',
-	            startTime: newEvent.startTime || new Date(),
-	            endTime: newEvent.endTime || new Date(),
+	            startTime: newEvent.startTime || 'not specified',
+	            endTime: newEvent.endTime || 'not specified',
 	            location: newEvent.location || 'url',
 	            repeats: newEvent.repeats || 'None'}
         	, calId);
         console.log('adding events ' + calId);
+        response.send(200);
+    } catch (exception) {
+        response.send(404);
+    }
+});
+// updating the calenders itself
+app.put('/updateCalendar/:id', function (request, response) {
+
+    var updatedCal = request.body;
+    var calId = request.params.id;
+
+	console.log('updateCalendar ' + calId);
+    console.log('username ' + updatedCal.userName);
+    console.log('password ' + updatedCal.password);
+
+    try {
+    	var persistedCal = calRepo.find(calId);
+    	console.log('persistedCal ' + persistedCal.calId);
+    	console.log('persistedCal ' + persistedCal.userName);
+    	console.log('persistedCal ' + persistedCal.password);
+
+    	calRepo.updateCalendar({
+        	calId: persistedCal.calId,
+	        userName: updatedCal.userName || persistedCal.userName,
+	        password: updatedCal.password || persistedCal.password
+	    });
+
         response.send(200);
     } catch (exception) {
         response.send(404);
