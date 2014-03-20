@@ -209,7 +209,7 @@ app.put('/calendars/:id/newEvent', function (request, response) {
 });
 // updating the calenders itself
 // curl -i -X PUT http://localhost:5000/updateCalendar/3 --data '{"userName":"fffffffff","password":"fffffff"}' -H "Content-Type: application/json"
-app.put('calendars/:id/updateCalendar/', function (request, response) {
+app.put('/calendars/:id/updateCalendar', function (request, response) {
 
     var updatedCal = request.body;
     var calId = request.params.id;
@@ -231,7 +231,7 @@ app.put('calendars/:id/updateCalendar/', function (request, response) {
 	delete a specific event from a calendar
 	WORKING
 */
-app.delete('/calendars/deleteEvent/:calId/:eventId', function (request, response) {
+app.delete('/calendars/:calId/deleteEvent/:eventId', function (request, response) {
     try {
         calRepo.removeEvent(request.params.calId, request.params.eventId);
         response.send(200);

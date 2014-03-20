@@ -8,7 +8,7 @@ frisby.create('Return all calendars if any created')
 .toss()
 
 frisby.create('Creating a calender with a user name and password')
-  .post('http://calendernodejs-lee.herokuapp.com/newCalendar', {
+  .post('http://calendernodejs-lee.herokuapp.com/calendars/new', {
       userName: "test",
       password: "testpassword"
     })
@@ -31,7 +31,7 @@ frisby.create('return calendars belonging to a certain calendar Id')
 
 
 frisby.create('Alter the user name and password on a calendar id 1')
-  .put('http://calendernodejs-lee.herokuapp.com/updateCalendar/1', {
+  .put('http://calendernodejs-lee.herokuapp.com/calendars/1/updateCalendar', {
       userName: "updateUsername",
       password: "testieUPdated"
     })
@@ -39,8 +39,8 @@ frisby.create('Alter the user name and password on a calendar id 1')
 .toss()
 
 
-frisby.create('Create an event in a calendar')
-  .put('http://calendernodejs-lee.herokuapp.com/calendars/newEvent/2', {
+frisby.create('Create an event on a calendar id 1')
+  .put('http://calendernodejs-lee.herokuapp.com/calendars/1/newEvent', {
         description: "something boring",
 	    startTime: "13-06-2014 08:00:00",
 	    endTime: "15-12-2014 18:00:00",
@@ -50,7 +50,7 @@ frisby.create('Create an event in a calendar')
   	.expectStatus(200)
 .toss()
 
-frisby.create('Create an event in a calendar that will not exist')
+frisby.create('Create an event in a calendar that will not exist -- epecting error')
   .put('http://calendernodejs-lee.herokuapp.com/calendars/newEvent/100000000000000', {
         description: "something boring",
 	    startTime: "13-06-2014 08:00:00",
