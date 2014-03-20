@@ -251,6 +251,15 @@ app.delete('/calendars/:id/delete', function (request, response) {
         response.send(404);
     }
 });
+// delete all
+app.delete('/calendars/deleteAll', function (request, response) {
+    try {
+        calRepo.calendars = [];
+        response.send(200);
+    } catch (exeception) {
+        response.send(404);
+    }
+});
 
 app.listen(port);
 console.log("Listening on " + port);
