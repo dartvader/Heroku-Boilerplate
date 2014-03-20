@@ -229,7 +229,6 @@ app.put('/calendars/:id/updateCalendar', function (request, response) {
 });
 /*
 	delete a specific event from a calendar
-	WORKING
 */
 app.delete('/calendars/:calId/deleteEvent/:eventId', function (request, response) {
     try {
