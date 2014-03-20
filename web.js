@@ -31,8 +31,6 @@ CalendarsRepo.prototype.getByUser =  function(userName) {
 
 	this.calendars.filter(function (item) {
 		if (item.userName == userName) {
-			console.log("passed in user name " + userName);
-			console.log("Calendar user name " + item.userName);
 			calFound.push(item);
 		}
 	}); 
@@ -58,19 +56,9 @@ CalendarsRepo.prototype.findIndex = function (id) {
 
 CalendarsRepo.prototype.addCalendar = function (calendar) {
     if (calendar.calId == null || calendar.calId == 0) {
+
         calendar.calId = this.nextId;
-        // add events array
         calendar.events = [];
-        this.userNames.forEach(function(value) {
-
-        	console.log('events found ' + value.userName);
-
-	        if (value.userName != calendar.userName) {
-        		this.userNames.push(calendar.userName);
-	        } else {
-	        	throw new Error('User Name already exists');
-	        }
-	    });
         this.calendars.push(calendar);
         // auto increment ids that are being applied to the calanders
         this.nextId++;
@@ -81,34 +69,22 @@ CalendarsRepo.prototype.addCalendar = function (calendar) {
 
 CalendarsRepo.prototype.updateCalendar = function (updatedCalendar) {
 
-    console.log('calendar ' + updatedCalendar.calId);
-    console.log('calendar ' + updatedCalendar.userName);
-    console.log('calendar ' + updatedCalendar.password);
     var index = this.findIndex(updatedCalendar.calId);
     this.calendars[index] = updatedCalendar;
 }
 
 CalendarsRepo.prototype.addEvent = function (newEvent, calId) {
     newEvent.Id = this.nextEventId;
-    // add calendar to the array
     this.calendars[calId - 1].events.push(newEvent);
     this.nextEventId++;
-}
-
-// not working
-CalendarsRepo.prototype.findEvents = function (calId, start, end) {
-    
-    return eventsFound;
 }
 
 CalendarsRepo.prototype.removeEvent = function (calId, eventId) {
     var index = null;
     var calId = this.findIndex(calId);
 
-    console.log("found calendar " + calId);
     this.calendars[calId].events.forEach(function(item, key) {
         if (item.Id == eventId) {
-        	console.log("found event " + key);
             index = key;
         }
     });
@@ -138,10 +114,6 @@ app.configure(function () {
     app.use(express.bodyParser());
 });
 
-app.get('/', function (request, response) {
-	console.log("Hello ");
-    response.json({calendars: calRepo.findAll()});
-});
 app.get('/calendars', function (request, response) {
     response.json({calendars: calRepo.findAll()});
 });
@@ -152,8 +124,20 @@ app.get('/calendars', function (request, response) {
 app.get('/calendars/:id', function (request, response) {
 	var id = request.params.id;;
     try {
-		console.log('Calendarid ' + id);
         response.json(calRepo.find(id));
+    } catch (exeception) {
+        response.send(404);
+    }
+});
+/* 
+	get calendars belong to the specific user name passed through 
+
+*/
+app.get('/calendars/:user/getByUser', function (request, response) {
+	try {
+		var userName = request.params.user;
+		response.json(calRepo.getByUser(userName));
+
     } catch (exeception) {
         response.send(404);
     }
@@ -164,32 +148,14 @@ app.get('/calendars/:id', function (request, response) {
 	curl -i -X GET http://localhost:5000/calendars/getEvents/1/ "13-06-2014 08:00:00"/"13-12-2014 18:00:00"
 
 */
-app.get('/calendars/getEvents/:id/:startTime/:endTime', function (request, response) {
+app.get('/calendars/:id/getEvents/:startTime/:endTime', function (request, response) {
 	var calId = request.params.id;
 	var start = request.params.startTime;
 	var end = request.params.endTime;
 
-	console.log('Calendarid ' + calId + ' start ' + start + ' end ' + end);
-
     try {
-		console.log('Calendarid ' + calId + ' start ' + start + ' end ' + end);
         response.json(calRepo.findEvents(calId , start, end));
         response.send(200);
-    } catch (exeception) {
-        response.send(404);
-    }
-});
-/* 
-	get calendars belong to the specific user name passed through 
-	WORKS
-*/
-app.get('/calendars/getByUser/:user', function (request, response) {
-	try {
-		var userName = request.params.user;
-		console.log("passed variable " + request.params.user);
-    	console.log("Calendar user name " + userName);
-		response.json(calRepo.getByUser(userName));
-
     } catch (exeception) {
         response.send(404);
     }
@@ -199,7 +165,7 @@ app.get('/calendars/getByUser/:user', function (request, response) {
 	curl -i -X POST http://calendernodejs-lee.herokuapp.com/calendars --data '{"userName":"leeee","password":"leeeespass"}' -H "Content-Type: application/json"
 	WORKS
 */
-app.post('/newCalendar', function (request, response) {
+app.post('/calendars/new', function (request, response) {
 	var cal = request.body;
 	try {
 		calRepo.addCalendar({
@@ -221,11 +187,11 @@ app.post('/newCalendar', function (request, response) {
 
 	WORKING
 */
-app.put('/calendars/newEvent/:id', function (request, response) {
+app.put('/calendars/:id/newEvent', function (request, response) {
 
     var newEvent = request.body;
     var calId = request.params.id;
-    console.log('adding events ' + calId);
+
     var start, end;
 
     try {
@@ -236,7 +202,6 @@ app.put('/calendars/newEvent/:id', function (request, response) {
 	            location: newEvent.location || 'url',
 	            repeats: newEvent.repeats || 'None'}
         	, calId);
-        console.log('adding events ' + calId);
         response.send(200);
     } catch (exception) {
         response.send(404);
@@ -244,20 +209,12 @@ app.put('/calendars/newEvent/:id', function (request, response) {
 });
 // updating the calenders itself
 // curl -i -X PUT http://localhost:5000/updateCalendar/3 --data '{"userName":"fffffffff","password":"fffffff"}' -H "Content-Type: application/json"
-app.put('/updateCalendar/:id', function (request, response) {
+app.put('calendars/:id/updateCalendar/', function (request, response) {
 
     var updatedCal = request.body;
     var calId = request.params.id;
-
-	console.log('updateCalendar ' + calId);
-    console.log('username ' + updatedCal.userName);
-    console.log('password ' + updatedCal.password);
-
     try {
     	var persistedCal = calRepo.find(calId);
-    	console.log('persistedCal ' + persistedCal.calId);
-    	console.log('persistedCal ' + persistedCal.userName);
-    	console.log('persistedCal ' + persistedCal.password);
 
     	calRepo.updateCalendar({
         	calId: persistedCal.calId,
@@ -274,9 +231,8 @@ app.put('/updateCalendar/:id', function (request, response) {
 	delete a specific event from a calendar
 	WORKING
 */
-app.delete('/deleteEvent/:calId/:eventId', function (request, response) {
+app.delete('/calendars/deleteEvent/:calId/:eventId', function (request, response) {
     try {
-    	console.log("Removing event ");
         calRepo.removeEvent(request.params.calId, request.params.eventId);
         response.send(200);
     } catch (exeception) {
@@ -287,7 +243,7 @@ app.delete('/deleteEvent/:calId/:eventId', function (request, response) {
  	delete a specific calendar from calendars
  	works
 */
-app.delete('/calendars/:id', function (request, response) {
+app.delete('/calendars/:id/delete', function (request, response) {
     try {
         calRepo.removeCal(request.params.id);
         response.send(200);

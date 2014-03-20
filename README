@@ -1,3 +1,13 @@
-The Heroku Boilerplate includes all the files you need to get NodeJS set up on Heroku. The files were created from the Heroku tutorial, "Getting Started with Node.js on Heroku/Cedar" http://devcenter.heroku.com/articles/node-js
+This rest api has been developed using Node.js and Express.js. Node.js is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
 
-Follow along with the tutorial and use the files included to get your Heroku Node project up and running easily.
+Node.js has a very active open source community. There are thousands of packages available at www.nodes.org. I have taken advantage of several of these packages for developing my rest api.
+
+Express is the first package i installed. Express.js is a minimal and flexible node.js web application framework, providing a robust set of features for building single and multi-page, and hybrid web applications.
+
+I also installed a package called Frisby, Frisby is a REST API testing framework which built on node.js and Jasmine that makes testing API endpoints easy, fast, and fun. Jasmine is a seperate testing framework that is very popular in the AngularJS world. The tests i have developed are testing the active REST api that is committed to the cloud. Frisby does not allow me to test my delete api calls but i have displayed example in the documentation.
+
+http://calendernodejs-lee.herokuapp.com/
+
+I have also forked a repo called Heroku-Boilerplate as it contained the necessary files i need to deploy my code to Heroku. I just have not got around to changing the name of the repo. 
+
+

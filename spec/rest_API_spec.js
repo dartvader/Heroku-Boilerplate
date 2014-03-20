@@ -17,7 +17,7 @@ frisby.create('Creating a calender with a user name and password')
 
 
 frisby.create('return calendars belonging to a certain userName')
-  .get('http://calendernodejs-lee.herokuapp.com/calendars/getByUser/test')
+  .get('http://calendernodejs-lee.herokuapp.com/calendars/test/getByUser')
     .expectStatus(200)
     	.expectHeaderContains('Content-Type', 'json')
 .toss()
@@ -29,16 +29,6 @@ frisby.create('return calendars belonging to a certain calendar Id')
     	.expectHeaderContains('Content-Type', 'json')
 .toss()
 
-frisby.create('Create an event in a calendar')
-  .put('http://calendernodejs-lee.herokuapp.com/calendars/newEvent/1', {
-        description: "something boring",
-	    startTime: "13-06-2014 08:00:00",
-	    endTime: "15-12-2014 18:00:00",
-	    ocation: "url",
-	    repeats: "None"
-    })
-  	.expectStatus(200)
-.toss()
 
 frisby.create('Alter the user name and password on a calendar id 1')
   .put('http://calendernodejs-lee.herokuapp.com/updateCalendar/1', {
@@ -49,11 +39,31 @@ frisby.create('Alter the user name and password on a calendar id 1')
 .toss()
 
 
-// not working
-frisby.create('find events between date ranges')
-  .get('http://calendernodejs-lee.herokuapp.com/calendars/getEvents/"13-06-2013"/"13-06-2015"')
+frisby.create('Create an event in a calendar')
+  .put('http://calendernodejs-lee.herokuapp.com/calendars/newEvent/2', {
+        description: "something boring",
+	    startTime: "13-06-2014 08:00:00",
+	    endTime: "15-12-2014 18:00:00",
+	    location: "url",
+	    repeats: "None"
+    })
   	.expectStatus(200)
-  		.expectHeaderContains('Content-Type', 'json')
 .toss()
+
+frisby.create('Create an event in a calendar that will not exist')
+  .put('http://calendernodejs-lee.herokuapp.com/calendars/newEvent/100000000000000', {
+        description: "something boring",
+	    startTime: "13-06-2014 08:00:00",
+	    endTime: "15-12-2014 18:00:00",
+	    location: "url",
+	    repeats: "None"
+    })
+  	.expectStatus(404)
+.toss()
+
+
+
+
+
 
 
