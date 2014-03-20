@@ -55,8 +55,8 @@ CalendarsRepo.prototype.findIndex = function (id) {
 }
 
 CalendarsRepo.prototype.addCalendar = function (calendar) {
-    if (calendar.calId == null || calendar.calId == 0) {
 
+    if (calendar.calId == null || calendar.calId == 0) {
         calendar.calId = this.nextId;
         calendar.events = [];
         this.calendars.push(calendar);
@@ -169,7 +169,6 @@ app.post('/calendars/new', function (request, response) {
 	var cal = request.body;
 	try {
 		calRepo.addCalendar({
-			// intialise the caled
 			userName: cal.userName  || 'need a userName',
 			password: cal.password || 'need a password'
 		});
@@ -219,7 +218,8 @@ app.put('/calendars/:id/updateCalendar', function (request, response) {
     	calRepo.updateCalendar({
         	calId: persistedCal.calId,
 	        userName: updatedCal.userName || persistedCal.userName,
-	        password: updatedCal.password || persistedCal.password
+	        password: updatedCal.password || persistedCal.password,
+	        events: persistedCal.events
 	    });
 
         response.send(200);
