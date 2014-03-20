@@ -241,7 +241,6 @@ app.delete('/calendars/:calId/deleteEvent/:eventId', function (request, response
 });
 /*
  	delete a specific calendar from calendars
- 	works
 */
 app.delete('/calendars/:id/delete', function (request, response) {
     try {
@@ -251,6 +250,7 @@ app.delete('/calendars/:id/delete', function (request, response) {
         response.send(404);
     }
 });
+
 // delete all
 app.delete('/calendars/deleteAll', function (request, response) {
     try {
